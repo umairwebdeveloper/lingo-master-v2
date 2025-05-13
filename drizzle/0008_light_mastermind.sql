@@ -1,0 +1,1 @@
+ALTER TABLE "topics" ALTER COLUMN "topic_image" DROP NOT NULL;

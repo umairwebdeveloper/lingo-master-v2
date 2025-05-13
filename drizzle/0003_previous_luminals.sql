@@ -1,0 +1,1 @@
+ALTER TABLE "payments" ADD COLUMN "plan_type" varchar(50);

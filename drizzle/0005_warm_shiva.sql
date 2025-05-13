@@ -1,0 +1,1 @@
+ALTER TABLE "topics" ALTER COLUMN "category" SET DEFAULT 'null';

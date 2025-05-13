@@ -1,0 +1,1 @@
+ALTER TABLE "payments" ADD COLUMN "extra_days_date" timestamp;

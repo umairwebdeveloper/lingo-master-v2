@@ -1,0 +1,1 @@
+ALTER TABLE "user_streak" ADD COLUMN "last_week_date" timestamp;
