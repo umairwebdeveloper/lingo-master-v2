@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Check, Users, FileText } from "lucide-react";
-
+import { AvatarBadge } from "./avatar_badge";
+import { StatsBadge } from "./stats_badge";
 
 export default function Hero() {
     return (
@@ -19,7 +20,7 @@ export default function Hero() {
                 />
             </div>
 
-            <div className="relative container mx-auto px-6 pt-32 md:pb-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="relative container mx-auto px-6 py-32 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-36 items-center">
                 {/* Left */}
                 <div className="space-y-4">
                     <h1 className="text-4xl md:text-5xl text-center md:text-start font-bold leading-tight">
@@ -61,31 +62,52 @@ export default function Hero() {
                 <div className="flex justify-center">
                     {/* Mobile: two small images */}
                     <div className="flex flex-col items-center space-x-4 md:hidden">
-                        <Image
-                            src={"/landing_page/hero/side_image_3.png"}
-                            alt={"Mobile screenshot 2"}
-                            width={100}
-                            height={100}
-                            className="rounded-lg mb-4"
-                        />
-                        <Image
-                            src={"/landing_page/hero/side_image_2.png"}
-                            alt={"Mobile screenshot 1"}
-                            width={500}
-                            height={500}
-                            className="rounded-lg"
-                        />
+                        <div className="mb-3">
+                            <AvatarBadge
+                                images={[
+                                    "/landing_page/hero/student_1.png",
+                                    "/landing_page/hero/student_2.png",
+                                    "/landing_page/hero/student_3.png",
+                                    "/landing_page/hero/student_4.png",
+                                ]}
+                                showLabel={false}
+                            />
+                        </div>
+                        <div className="relative">
+                            <Image
+                                src={"/landing_page/hero/side_image_4.png"}
+                                alt={"Mobile screenshot 1"}
+                                width={500}
+                                height={500}
+                                className="rounded-lg"
+                            />
+                            <div className="absolute inset-x-0 -bottom-16">
+                                <StatsBadge />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Desktop: single large illustration */}
-                    <div className="hidden md:flex w-full">
+                    <div className="relative hidden md:flex w-full">
                         <Image
-                            src="/landing_page/hero/side_image.png"
+                            src="/logos/half_logo.svg"
                             alt="TheorieBuddy Logo"
-                            width={800}
-                            height={800}
+                            width={500}
+                            height={500}
                             className="object-contain"
                         />
+                        <div className="absolute bottom-0 -left-12">
+                            <AvatarBadge
+                                images={[
+                                    "/landing_page/hero/student_1.png",
+                                    "/landing_page/hero/student_2.png",
+                                    "/landing_page/hero/student_3.png",
+                                ]}
+                            />
+                        </div>
+                        <div className="absolute bottom-2 right-0 left-0">
+                            <StatsBadge fullWidth={false} />
+                        </div>
                     </div>
                 </div>
             </div>

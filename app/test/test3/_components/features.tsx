@@ -22,7 +22,9 @@ const features: Feature[] = [
 
 export default function Features() {
     return (
-        <div className="flex flex-col md:flex-row gap-4 container my-16">
+        <div
+            className="flex flex-col md:flex-row gap-4 container my-16"
+        >
             {features.map((f, i) => (
                 <div
                     key={i}

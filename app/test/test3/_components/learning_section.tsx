@@ -11,7 +11,7 @@ const featureList = [
 
 export default function LearningSection() {
     return (
-        <section className="bg-gray-50">
+        <section id="oefenen" className="bg-gray-50">
             <div className="container mx-auto px-6 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     {/* Left: screenshots */}

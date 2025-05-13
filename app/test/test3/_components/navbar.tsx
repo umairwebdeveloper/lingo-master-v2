@@ -1,19 +1,21 @@
+import { useActiveSection } from "@/lib/useActiveSection";
 import { useState, useEffect } from "react";
 
 interface NavLink {
     name: string;
-    href: string;
+    id: string;
 }
 
 const navLinks: NavLink[] = [
-    { name: "Home", href: "#home" },
-    { name: "Theorie examen oefenen", href: "#oefenen" },
-    { name: "Hoe werkt het?", href: "#hoe-werkt-het" },
-    { name: "Contact Us", href: "#contact" },
+    { name: "Home", id: "heroSection" },
+    { name: "Theorie examen oefenen", id: "oefenen" },
+    { name: "Hoe werkt het?", id: "hoe-werkt-het" },
+    { name: "Contact Us", id: "contact" },
 ];
 
 export default function Navbar() {
     const [showBorder, setShowBorder] = useState(false);
+    const activeId = useActiveSection(navLinks.map((item) => item.id));
 
     useEffect(() => {
         const onScroll = () => {
@@ -32,7 +34,7 @@ export default function Navbar() {
         <nav
             className={`dark:bg-gray-900 fixed w-full z-20 top-0 start-0 transition-colors ${
                 showBorder
-                    ? "border-b border-gray-300 dark:border-gray-600 bg-gray-100"
+                    ? "border-b border-gray-300 dark:border-gray-600 bg-blue-50"
                     : "bg-white"
             }`}
         >
@@ -77,17 +79,25 @@ export default function Navbar() {
                     className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
                     id="navbar-sticky"
                 >
-                    <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-200 rounded-lg md:space-x-4 lg:space-x-6 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-                        {navLinks.map((link) => (
-                            <li key={link.href}>
-                                <a
-                                    href={link.href}
-                                    className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-200 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700"
-                                >
-                                    {link.name}
-                                </a>
-                            </li>
-                        ))}
+                    <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-200 rounded-lg md:space-x-4 lg:space-x-6 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 ">
+                        {navLinks.map((link) => {
+                            const isActive = activeId === link.id;
+                            return (
+                                <li key={link.id}>
+                                    <a
+                                        href={`#${link.id}`}
+                                        className={
+                                            `block py-2 px-3 rounded-sm hover:bg-gray-200 md:hover:bg-transparent md:hover:text-blue-700 md:p-0  ` +
+                                            (isActive
+                                                ? "md:text-blue-600"
+                                                : "md:text-gray-900")
+                                        }
+                                    >
+                                        {link.name}
+                                    </a>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             </div>
