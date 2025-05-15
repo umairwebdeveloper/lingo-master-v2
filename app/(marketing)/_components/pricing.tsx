@@ -1,7 +1,7 @@
 // components/Pricing.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { Check, Loader } from "lucide-react";
@@ -48,6 +48,41 @@ export default function Pricing() {
     const [selected, setSelected] = useState<string>("expert");
     const [loadingOrder, setLoadingOrder] = useState<boolean>(false);
     const [isAuto, setIsAuto] = useState<boolean>(false);
+    const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+
+    // Fetch existing payment info on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await axios.get("/api/payment");
+                const data = response.data;
+                if (
+                    !data.redirect &&
+                    !data.isExpired &&
+                    data.payment?.planType
+                ) {
+                    let planId = "";
+                    switch (data.payment.planType) {
+                        case "Basis":
+                            planId = "basis";
+                            break;
+                        case "Expert":
+                            planId = "expert";
+                            break;
+                        case "Gevorderd":
+                            planId = "gevorderd";
+                            break;
+                    }
+                    if (planId) {
+                        setCurrentPlan(planId);
+                        setSelected(planId);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch payment info:", error);
+            }
+        })();
+    }, []);
 
     const handleOrder = async () => {
         setLoadingOrder(true);
@@ -57,7 +92,6 @@ export default function Pricing() {
                 planNumber: planIndex,
                 auto: isAuto,
             });
-            console.log(response);
             window.location.href = response.data.checkoutUrl;
         } catch (error: any) {
             console.error("Order error:", error);
@@ -76,7 +110,7 @@ export default function Pricing() {
                 Kies je <span className="text-blue-600">pakket!</span>
             </h2>
 
-            {/* Category pills */}
+            {/* Auto toggle */}
             <div className="flex justify-center my-6">
                 <button
                     onClick={() => setIsAuto((prev) => !prev)}
@@ -92,24 +126,33 @@ export default function Pricing() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {packages.map((pkg) => {
                     const isSel = selected === pkg.id;
+                    const isPurchased = currentPlan === pkg.id;
                     const displayTitle = `${isAuto ? "Auto – " : ""}${
                         pkg.title
                     }`;
                     return (
                         <div
                             key={pkg.id}
-                            onClick={() => setSelected(pkg.id)}
+                            onClick={() => !isPurchased && setSelected(pkg.id)}
                             className={`relative flex flex-col border rounded-2xl overflow-hidden cursor-pointer transition ${
-                                isSel
+                                isPurchased
+                                    ? "border-green-600 bg-green-50"
+                                    : isSel
                                     ? "border-blue-600 bg-blue-50"
                                     : "border-gray-200 bg-white hover:shadow-lg"
                             }`}
                         >
                             {/* Badge */}
-                            {pkg.recommended && (
+                            {isPurchased ? (
                                 <span className="absolute top-4 right-4 bg-green-100 text-green-600 font-semibold px-3 py-2 border rounded-full">
-                                    Aanbevolen
+                                    Gekocht
                                 </span>
+                            ) : (
+                                pkg.recommended && (
+                                    <span className="absolute top-4 right-4 bg-green-100 text-green-600 font-semibold px-3 py-2 border rounded-full">
+                                        Aanbevolen
+                                    </span>
+                                )
                             )}
 
                             {/* Image */}
@@ -157,6 +200,7 @@ export default function Pricing() {
                                     name="package"
                                     value={pkg.id}
                                     checked={isSel}
+                                    disabled={isPurchased}
                                     onChange={() => setSelected(pkg.id)}
                                     className="w-5 h-5 text-blue-600"
                                 />
@@ -188,15 +232,23 @@ export default function Pricing() {
             <div className="mt-8 text-center">
                 <button
                     onClick={handleOrder}
-                    disabled={loadingOrder}
+                    disabled={loadingOrder || selected === currentPlan}
                     className={`bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-blue-700 transition inline-flex items-center justify-center ${
-                        loadingOrder ? "opacity-50 cursor-not-allowed" : ""
+                        loadingOrder || selected === currentPlan
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                     }`}
                 >
-                    {loadingOrder && (
-                        <Loader className="animate-spin h-5 w-5 mr-2" />
+                    {loadingOrder ? (
+                        <>
+                            <Loader className="animate-spin h-5 w-5 mr-2" />
+                            Bezig met verwerken...
+                        </>
+                    ) : selected === currentPlan ? (
+                        "Al geactiveerd"
+                    ) : (
+                        "Bestel direct!"
                     )}
-                    {loadingOrder ? "Bezig met verwerken..." : "Bestel direct!"}
                 </button>
             </div>
         </section>

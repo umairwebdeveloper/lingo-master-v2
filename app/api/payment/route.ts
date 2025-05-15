@@ -179,7 +179,7 @@ export const GET = async (req: Request) => {
 
         if (userPayments.length === 0) {
             return NextResponse.json(
-                { payment: null, redirect: true },
+                { payment: null, redirect: true, isExpired: true },
                 { status: 200 }
             );
         }
@@ -192,6 +192,7 @@ export const GET = async (req: Request) => {
                 {
                     payment: null,
                     redirect: true,
+                    isExpired: true,
                     message: "Payment not completed.",
                 },
                 { status: 200 }
@@ -206,34 +207,34 @@ export const GET = async (req: Request) => {
 
         // Determine the plan duration based on the plan type
         switch (payment.planType) {
-            case "Basic Plan":
-                basePlanDays = 7;
-                exams = 3;
+            case "Basic":
+                basePlanDays = 21;
+                exams = 4;
                 break;
-            case "Pro Plan":
+            case "Expert":
+                basePlanDays = 31;
+                exams = 10;
+                break;
+            case "Gevorderd":
                 basePlanDays = 14;
-                exams = 6;
-                break;
-            case "Premium Plan":
-                basePlanDays = 28;
-                exams = 14;
+                exams = 7;
                 break;
             default:
-                basePlanDays = 0; // Unknown plan type
+                basePlanDays = 0;
                 exams = 0;
                 break;
         }
 
-        // Add extra days count to the base plan days
+        // Add extra days to the base plan
         const extraDays = payment.extraDays || 0;
         const totalPlanDays = basePlanDays + extraDays;
 
-        // Calculate package expiration date/time using the total plan days
+        // Calculate expiration date/time
         const createdAtDate = new Date(payment.createdAt);
         const packageExpireDate = new Date(createdAtDate);
         packageExpireDate.setDate(createdAtDate.getDate() + totalPlanDays);
 
-        // Format the packageExpireDate as "YY/MM/DD at HH:mm"
+        // Format expiration date
         const formattedPackageExpireDate = `${packageExpireDate
             .getFullYear()
             .toString()
@@ -247,17 +248,19 @@ export const GET = async (req: Request) => {
             "0"
         )}`;
 
-        // Calculate days left using the total plan days
+        // Calculate days left
         const daysLeft = totalPlanDays - (daysSincePayment || 0);
+        const isExpired = daysLeft <= 0;
 
-        if (daysLeft <= 0) {
-            // Delete the payment record if the plan has expired
+        if (isExpired) {
+            // Remove expired payment
             await db.delete(payments).where(eq(payments.id, payment.id));
 
             return NextResponse.json(
                 {
                     payment: null,
                     redirect: true,
+                    isExpired: true,
                     message:
                         "Payment record deleted after exceeding the plan duration.",
                 },
@@ -269,6 +272,7 @@ export const GET = async (req: Request) => {
             {
                 payment,
                 redirect: false,
+                isExpired: false,
                 daysLeft: daysLeft > 0 ? daysLeft - 1 : daysLeft,
                 totalDays: totalPlanDays,
                 message: `You have ${daysLeft} day(s) left in your ${payment.planType}.`,
