@@ -87,7 +87,7 @@ export default function ExamTimer({ examId, onComplete }: ExamTimerProps) {
     const seconds = remainingTime % 60;
 
     return (
-        <div className="flex gap-2 items-center my-3">
+        <div className="flex gap-2 items-center my-3 border p-3 rounded-xl bg-white">
             <div className="text-xl font-mono">
                 {pad(minutes)}:{pad(seconds)}
             </div>

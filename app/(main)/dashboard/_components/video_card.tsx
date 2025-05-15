@@ -66,26 +66,31 @@ const VideoCard: React.FC<{ className?: string }> = ({ className }) => {
         >
             <div className="flex-1 flex flex-col justify-between">
                 <div>
-                     <h2 className={`${albertSans.className} text-2xl text-[#3D3D3D] font-semibold leading-normal`}>
-                         Hoofdstuk 4
+                    <h2
+                        className={`${albertSans.className} text-2xl text-[#3D3D3D] font-semibold leading-normal`}
+                    >
+                        {chapter.lastWatchedVideo.title}
                     </h2>
-                    <p className={`${albertSans.className} mt-[12px] mb-[12px] text-[#6D6D6D] text-[13.5px]`}>
-                    Tijdens deze les ga je leren wat voorraangsborden zijn
+                    <p
+                        className={`${albertSans.className} mt-[12px] mb-[12px] text-[#6D6D6D] text-[13.5px]`}
+                    >
+                        {chapter.lastWatchedVideo.description}
                     </p>
-
-
-
 
                     <button
                         onClick={() => router.push("/videos")}
                         className={`${inter.className} text-[14px] font-medium bg-[#0A65FC] hover:bg-blue-600 text-white pl-6 pr-6 pt-[10px] pb-[10px] rounded-full`}
-                        >
-                        {chapter?.completedVideos > 0 ? "Ga verder met leren" : "Start"}{" "}
+                    >
+                        {chapter?.completedVideos > 0
+                            ? "Ga verder met leren"
+                            : "Start"}{" "}
                     </button>
 
                     <div className="mt-[24px]">
                         <div className="flex items-center justify-between">
-                        <span className={`${albertSans.className} text-[#6D6D6D] text-[14px] font-normal`}>
+                            <span
+                                className={`${albertSans.className} text-[#6D6D6D] text-[14px] font-normal`}
+                            >
                                 Videos: {chapter.completedVideos}/
                                 {chapter.totalVideos}
                             </span>
@@ -104,8 +109,8 @@ const VideoCard: React.FC<{ className?: string }> = ({ className }) => {
             <div className="relative w-full md:w-1/2">
                 <div className="h-auto w-full relative">
                     <video
-                      
                         controls
+                        src={chapter.lastWatchedVideo.videoSrc}
                         className="rounded-xl w-full h-full object-cover"
                     >
                         Your browser does not support the video tag.

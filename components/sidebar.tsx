@@ -37,7 +37,7 @@ export const Sidebar = ({
         )}
       >
         <div className="flex items-center justify-center pt-6 pb-7">
-          <Link href="/dashboard">
+          <Link href="/">
             <Image
               src={
                 effectiveCollapsed

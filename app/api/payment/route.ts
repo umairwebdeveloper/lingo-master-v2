@@ -12,27 +12,28 @@ const mollieClient = createMollieClient({
 
 const plans = [
     {
-        name: "Basic Plan",
-        description: "7 days access",
-        amount: "10.00",
-        interval: "7 days",
-    },
-    {
-        name: "Pro Plan",
-        description: "14 days access",
-        amount: "20.00",
+        name: "Basis",
+        amount: "29.99",
+        description: "14 dagen toegang, 4 CBR exammodules",
         interval: "14 days",
     },
     {
-        name: "Premium Plan",
-        description: "28 days access",
-        amount: "30.00",
-        interval: "28 days",
+        name: "Expert",
+        amount: "49.99",
+        description: "31 dagen toegang, 10 CBR exammodules",
+        interval: "31 days",
+    },
+    {
+        name: "Gevorderd",
+        amount: "39.99",
+        description: "21 dagen toegang, 7 CBR exammodules",
+        interval: "21 days",
     },
 ];
 
 export const POST = async (req: Request) => {
     try {
+        // Authenticate user
         const { userId }: any = await auth();
         const user: any = await currentUser();
 
@@ -43,20 +44,30 @@ export const POST = async (req: Request) => {
             );
         }
 
-        const { planNumber } = await req.json();
+        // Extract request body
+        const { planNumber, auto } = await req.json();
 
-        if (planNumber === undefined || !plans[planNumber]) {
+        // Validate inputs
+        if (typeof planNumber !== "number" || !plans[planNumber]) {
             return NextResponse.json(
                 { error: "Invalid plan number provided." },
+                { status: 400 }
+            );
+        }
+        if (typeof auto !== "boolean") {
+            return NextResponse.json(
+                { error: "Invalid auto flag provided." },
                 { status: 400 }
             );
         }
 
         const plan = plans[planNumber];
 
-        const name = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
-        const email = user?.emailAddresses[0]?.emailAddress;
-
+        // Build metadata
+        const name =
+            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+            "Unknown User";
+        const email = user.emailAddresses?.[0]?.emailAddress;
         if (!email) {
             return NextResponse.json(
                 { error: "Email not found for the user." },
@@ -64,13 +75,10 @@ export const POST = async (req: Request) => {
             );
         }
 
-        // Create a Mollie customer
-        const customer = await mollieClient.customers.create({
-            name: name || "Unknown User",
-            email,
-        });
+        // Create Mollie customer
+        const customer = await mollieClient.customers.create({ name, email });
 
-        // Create a Mollie payment
+        // Create Mollie payment
         const payment: any = await mollieClient.payments.create({
             amount: { currency: "EUR", value: plan.amount },
             description: plan.description,
@@ -79,14 +87,15 @@ export const POST = async (req: Request) => {
             customerId: customer.id,
             sequenceType: SequenceType.first,
             metadata: {
-                userId, // Save the Clerk user ID in the metadata
+                userId,
                 planName: plan.name,
+                auto,
             },
         });
 
         return NextResponse.json(
             {
-                message: `${plan.name} Checkout URL created successfully.`,
+                message: `${plan.name} checkout URL created successfully.`,
                 checkoutUrl: payment.getCheckoutUrl(),
             },
             { status: 200 }

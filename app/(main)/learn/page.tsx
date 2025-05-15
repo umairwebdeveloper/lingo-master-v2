@@ -8,7 +8,6 @@ import { Exam } from "./_components/types";
 import Loader from "@/components/loader";
 import ErrorComponent from "@/components/error-component";
 import ModeToggle from "./_components/mode_toggle";
-import ExamTimer from "./_components/exam_timer";
 
 // Define the type for the API exam data.
 interface APICategoryStat {
@@ -112,10 +111,6 @@ const ExamsPage: NextPage = () => {
     return (
         <div className="container max-w-[1650px] pt-1 px-3 md:px-6 pb-6">
             <ModeToggle enabled={enabled} onChange={setEnabled} />
-            <ExamTimer
-                examId="1"
-                onComplete={() => console.log("complete")}
-            />
             {exams.map((exam) => (
                 <ExamCard key={exam.id} exam={exam} />
             ))}
