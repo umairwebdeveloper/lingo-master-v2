@@ -1,28 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/db/drizzle";
-import { questions, userAnswers } from "@/db/schema";
+import { questions, userAnswers, topics } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@clerk/nextjs";
 
 export async function GET(req: NextRequest) {
     try {
-        // 1. Get query parameters: userId, topicId
         const { searchParams } = new URL(req.url);
         const { userId } = auth();
-        const topicId = searchParams.get("topicId");
+        const topicIdParam = searchParams.get("topicId");
 
-        if (!userId || !topicId) {
+        if (!userId || !topicIdParam) {
             return NextResponse.json(
                 { error: "Missing userId or topicId in query params" },
                 { status: 400 }
             );
         }
 
-        // 2. Query all questions for the given topicId, left-join userAnswers for this user
+        const topicId = parseInt(topicIdParam, 10);
+
+        // Fetch topic info
+        const topicRecord = await db
+            .select({
+                id: topics.id,
+                name: topics.topic,
+                image: topics.topicImage,
+                category: topics.category,
+                status: topics.status,
+                order: topics.order,
+            })
+            .from(topics)
+            .where(eq(topics.id, topicId))
+            .limit(1)
+            .then((rows) => rows[0] || null);
+
+        if (!topicRecord) {
+            return NextResponse.json(
+                { error: "Topic not found" },
+                { status: 404 }
+            );
+        }
+
+        // Select question fields plus the user’s answer and correctness
         const questionRecords = await db
             .select({
-                questionId: questions.id,
-                userAnswerIsCorrect: userAnswers.isCorrect, // 'true', 'false', or null
+                id: questions.id,
+                type: questions.question_type,
+                category: questions.category,
+                questionText: questions.question,
+                description: questions.description,
+                options: questions.options,
+                imageOptions: questions.imageOptions,
+                image: questions.image,
+                correctAnswer: questions.correctAnswer,
+                explanation: questions.explanation,
+                selectedAnswer: userAnswers.selectedAnswer,
+                userAnswerIsCorrect: userAnswers.isCorrect,
             })
             .from(questions)
             .leftJoin(
@@ -32,31 +65,40 @@ export async function GET(req: NextRequest) {
                     eq(userAnswers.userId, userId)
                 )
             )
-            .where(eq(questions.topicId, parseInt(topicId, 10)))
-            .orderBy(questions.id); // optional: sort by question ID
+            .where(eq(questions.topicId, topicId))
+            .orderBy(questions.id);
 
-        // 3. Transform each question into { id, number, status }
-        //    status is determined by userAnswers.isCorrect
-        //    - null => 'pending'
-        //    - 'true' => 'correct'
-        //    - 'false' => 'incorrect'
-        const data = questionRecords.map((record) => {
+        // Map into a rich payload
+        const questionsData = questionRecords.map((q) => {
             let status: "pending" | "correct" | "incorrect" = "pending";
-
-            if (record.userAnswerIsCorrect === "true") {
+            if (q.userAnswerIsCorrect === "true") {
                 status = "correct";
-            } else if (record.userAnswerIsCorrect === "false") {
+            } else if (q.userAnswerIsCorrect === "false") {
                 status = "incorrect";
             }
 
             return {
-                id: record.questionId,
+                id: q.id,
+                type: q.type,
+                category: q.category,
+                questionText: q.questionText,
+                description: q.description,
+                options: q.options,
+                imageOptions: q.imageOptions,
+                image: q.image,
+                explanation: q.explanation,
+                correctAnswer: q.correctAnswer,
+                selectedAnswer: q.selectedAnswer,
                 status,
+                is_correct: q.userAnswerIsCorrect,
             };
         });
 
-        // 4. Return the array
-        return NextResponse.json(data);
+        // Return both topic info and questions
+        return NextResponse.json({
+            topic: topicRecord,
+            questions: questionsData,
+        });
     } catch (error) {
         console.error("GET /api/topic-questions error:", error);
         return NextResponse.json(
@@ -65,3 +107,5 @@ export async function GET(req: NextRequest) {
         );
     }
 }
+
+// const ans = await db.delete(userAnswers).where(eq(userAnswers.userId, userId));

@@ -81,7 +81,7 @@ export const POST = async (req: Request) => {
         // Create Mollie payment
         const payment: any = await mollieClient.payments.create({
             amount: { currency: "EUR", value: plan.amount },
-            description: plan.description,
+            description: plan.name + " - " + plan.description,
             redirectUrl: "https://lingo-henna.vercel.app/thankyou",
             webhookUrl: "https://lingo-henna.vercel.app/api/webhook",
             customerId: customer.id,

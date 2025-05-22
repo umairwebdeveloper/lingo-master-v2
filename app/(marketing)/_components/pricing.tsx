@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Image from "next/image";
 import { Check, Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type Package = {
     id: string;
@@ -49,6 +51,7 @@ export default function Pricing() {
     const [loadingOrder, setLoadingOrder] = useState<boolean>(false);
     const [isAuto, setIsAuto] = useState<boolean>(false);
     const [currentPlan, setCurrentPlan] = useState<string | null>(null);
+    const router = useRouter();
 
     // Fetch existing payment info on mount
     useEffect(() => {
@@ -95,9 +98,13 @@ export default function Pricing() {
             window.location.href = response.data.checkoutUrl;
         } catch (error: any) {
             console.error("Order error:", error);
+            if (error.response?.status === 401) {
+                router.push("/sign-in");
+                return;
+            }
             const errorMessage =
                 error.response?.data?.error || "An unknown error occurred.";
-            alert(`Failed to create payment: ${errorMessage}`);
+            toast.error(`Failed to create payment: ${errorMessage}`);
         } finally {
             setLoadingOrder(false);
         }

@@ -32,6 +32,7 @@ interface QuestionContentProps {
     total: number;
     correct: number;
     wrong: number;
+    examEnabled: boolean;
 }
 
 const QuestionContent: React.FC<QuestionContentProps> = ({
@@ -50,6 +51,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     total,
     correct,
     wrong,
+    examEnabled,
 }) => {
     const router = useRouter();
     const { id }: any = useParams();
@@ -60,6 +62,13 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
         );
     };
 
+    const handleNextQuestion = () => {
+        handleSubmit();
+        if (examEnabled) {
+            nextQ();
+        }
+    };
+
     return (
         <>
             <div className="w-full bg-white rounded-[var(--Special-Gap-01-20,20px)] border border-[var(--GreyScale-100,#E7E7E7)] p-[var(--Text-gap-small-24,24px)] px-[var(--Spacing-6,24px)]">
@@ -68,8 +77,6 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                         {question.category}
                     </span>
                 )} */}
-
-                {/* Question Text */}
                 <h2
                     className={`${albertSans.className} font-semibold text-[28px] leading-[150%] text-[var(--GreyScale-900,#3D3D3D)] mt-[4px]`}
                 >
@@ -81,7 +88,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                     {question.questionDetail}
                 </p>
 
-                {/* Multiple Choice (without images) */}
+                {/* Multiple Choice */}
                 {question.type === "multiple" && (
                     <div className="my-4 space-y-2">
                         {question.choices.map((choice: any, i: number) => (
@@ -126,58 +133,53 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
 
                 {/* Multiple Choice With Images */}
                 {question.type === "multiple-choice-with-image" && (
-                    <div className="my-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            {question.choices.map((choice: any, i: number) => (
-                                <label
-                                    key={i}
-                                    className={`flex flex-col items-center p-4 border rounded-xl cursor-pointer ${getChoiceClasses(
-                                        choice,
-                                        i
-                                    )}`}
-                                >
-                                    {choice.image && (
-                                        // Using a container div to enforce a square aspect ratio.
-                                        <div className="w-24 h-24 relative">
-                                            <img
-                                                src={choice.image}
-                                                alt={`Option ${letters[i]}`}
-                                                className="object-cover rounded-xl w-full h-full"
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="flex items-center mt-2">
-                                        <span
-                                            className={`rounded-full px-2 ${getLetterClasses(
-                                                choice,
-                                                i
-                                            )}`}
-                                        >
-                                            {letters[i]}
-                                        </span>
-                                        <span className="ml-2">
-                                            {choice.text}
-                                        </span>
+                    <div className="my-4 grid grid-cols-2 gap-4">
+                        {question.choices.map((choice: any, i: number) => (
+                            <label
+                                key={i}
+                                className={`flex flex-col items-center p-4 border rounded-xl cursor-pointer ${getChoiceClasses(
+                                    choice,
+                                    i
+                                )}`}
+                            >
+                                {choice.image && (
+                                    <div className="w-24 h-24 relative">
+                                        <img
+                                            src={choice.image}
+                                            alt={`Option ${letters[i]}`}
+                                            className="object-cover rounded-xl w-full h-full"
+                                        />
                                     </div>
-                                    <input
-                                        type="radio"
-                                        disabled={answer.feedback}
-                                        checked={answer.response === i}
-                                        onChange={() => handleSelect(i)}
-                                        className={`form-radio mt-2 h-5 w-5 ${getRadioColor(
+                                )}
+                                <div className="flex items-center mt-2">
+                                    <span
+                                        className={`rounded-full px-2 ${getLetterClasses(
                                             choice,
                                             i
                                         )}`}
-                                    />
-                                </label>
-                            ))}
-                        </div>
+                                    >
+                                        {letters[i]}
+                                    </span>
+                                    <span className="ml-2">{choice.text}</span>
+                                </div>
+                                <input
+                                    type="radio"
+                                    disabled={answer.feedback}
+                                    checked={answer.response === i}
+                                    onChange={() => handleSelect(i)}
+                                    className={`form-radio mt-2 h-5 w-5 ${getRadioColor(
+                                        choice,
+                                        i
+                                    )}`}
+                                />
+                            </label>
+                        ))}
                     </div>
                 )}
 
                 {/* Fill in the Blank */}
                 {question.type === "fill" && (
-                    <div className="my-4 flex aling-center ">
+                    <div className="my-4 flex items-center">
                         <input
                             type="text"
                             value={answer.response as string}
@@ -186,18 +188,19 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                             className="w-full p-2 border rounded-xl"
                             placeholder="Your answer..."
                         />
-                        <div className=" p-2  rounded-xl">
+                        <div className="p-2 rounded-xl">
                             <p>km/u</p>
                         </div>
                     </div>
                 )}
+
                 <hr />
-                {/* Submit / Next / Previous / Finish Buttons */}
+                {/* Navigation Buttons */}
                 <div className="flex justify-between mt-4">
                     <button
                         disabled={index === 0}
                         onClick={prevQ}
-                        className={`${inter.className} bg-[#ffffff] pl-6 pr-6 border-2 border-[#E7E7E7] text-[#6D6D6D] rounded-full  disabled:opacity-50`}
+                        className={`${inter.className} bg-[#ffffff] pl-6 pr-6 border-2 border-[#E7E7E7] text-[#6D6D6D] rounded-full disabled:opacity-50`}
                     >
                         Terug
                     </button>
@@ -205,7 +208,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                     {index < total - 1 ? (
                         !answer.feedback ? (
                             <button
-                                onClick={handleSubmit}
+                                onClick={handleNextQuestion}
                                 className={`${inter.className} text-[14px] font-medium bg-[#0A65FC] hover:bg-blue-600 text-white pl-6 pr-6 pt-[10px] pb-[10px] rounded-full`}
                             >
                                 Volgende
@@ -236,71 +239,59 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                 </div>
             </div>
 
-            <div>
-                {/* Feedback / Explanation */}
-                {answer.feedback && (
-                    <div className="mt-4 p-3 bg-green-50 border rounded-2xl">
-                        {question.type === "multiple" &&
-                            answer.response !== null && (
-                                <>
-                                    {question.choices[answer.response as number]
-                                        .isCorrect ? (
-                                        <p className="text-green-600 font-semibold flex gap-1">
-                                            <Image
-                                                src="/q-check.svg"
-                                                alt="check"
-                                                width={25}
-                                                height={25}
-                                            />{" "}
-                                            Correct!
-                                        </p>
-                                    ) : (
-                                        <p className="text-red-600 font-semibold flex gap-1">
-                                            <Image
-                                                src="/q-wrong.svg"
-                                                alt="wrong"
-                                                width={25}
-                                                height={25}
-                                            />{" "}
-                                            Wrong.
-                                        </p>
-                                    )}
-                                </>
-                            )}
-                        {question.type === "fill" && (
-                            <>
-                                {(answer.response as string)
-                                    .trim()
-                                    .toLowerCase() ===
-                                question.correctAnswer.trim().toLowerCase() ? (
-                                    <p className="text-green-600 font-semibold flex gap-1">
-                                        <Image
-                                            src="/q-check.svg"
-                                            alt="check"
-                                            width={25}
-                                            height={25}
-                                        />{" "}
-                                        Correct!
-                                    </p>
-                                ) : (
-                                    <p className="text-red-600 font-semibold flex gap-1">
-                                        <Image
-                                            src="/q-wrong.svg"
-                                            alt="wrong"
-                                            width={25}
-                                            height={25}
-                                        />{" "}
-                                        Wrong.
-                                    </p>
-                                )}
-                            </>
-                        )}
-                        <p className="text-gray-700  mt-2">
-                            {question.explanation}
-                        </p>
-                    </div>
-                )}
-            </div>
+            {/* Feedback / Explanation (hidden during exam mode) */}
+            {!examEnabled && answer.feedback && (
+                <div className="mt-4 p-3 bg-green-50 border rounded-2xl">
+                    {question.type === "multiple" &&
+                        answer.response !== null &&
+                        (question.choices[answer.response as number]
+                            .isCorrect ? (
+                            <p className="text-green-600 font-semibold flex gap-1">
+                                <Image
+                                    src="/q-check.svg"
+                                    alt="check"
+                                    width={25}
+                                    height={25}
+                                />{" "}
+                                Correct!
+                            </p>
+                        ) : (
+                            <p className="text-red-600 font-semibold flex gap-1">
+                                <Image
+                                    src="/q-wrong.svg"
+                                    alt="wrong"
+                                    width={25}
+                                    height={25}
+                                />{" "}
+                                Wrong.
+                            </p>
+                        ))}
+                    {question.type === "fill" &&
+                        ((answer.response as string).trim().toLowerCase() ===
+                        question.correctAnswer.trim().toLowerCase() ? (
+                            <p className="text-green-600 font-semibold flex gap-1">
+                                <Image
+                                    src="/q-check.svg"
+                                    alt="check"
+                                    width={25}
+                                    height={25}
+                                />{" "}
+                                Correct!
+                            </p>
+                        ) : (
+                            <p className="text-red-600 font-semibold flex gap-1">
+                                <Image
+                                    src="/q-wrong.svg"
+                                    alt="wrong"
+                                    width={25}
+                                    height={25}
+                                />{" "}
+                                Wrong.
+                            </p>
+                        ))}
+                    <p className="text-gray-700 mt-2">{question.explanation}</p>
+                </div>
+            )}
         </>
     );
 };
