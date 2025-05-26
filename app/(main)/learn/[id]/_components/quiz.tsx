@@ -346,6 +346,8 @@ export default function Quiz({
                         wrong={wrong}
                         onPrev={prevQ}
                         index={index}
+                        examEnabled={examEnabled}
+                        quizAction={quizAction}
                     />
 
                     <QuestionContent

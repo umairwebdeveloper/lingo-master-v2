@@ -4,20 +4,18 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { Albert_Sans } from '@next/font/google';
-import { Inter } from '@next/font/google';
-
-
+import { Albert_Sans } from "@next/font/google";
+import { Inter } from "@next/font/google";
 
 const albertSans = Albert_Sans({
-    subsets: ['latin'],
-    weight: ['100', '200', '300', '400' , '500', '600']
-})
+    subsets: ["latin"],
+    weight: ["100", "200", "300", "400", "500", "600"],
+});
 
 const inter = Inter({
-    subsets: ['latin'],
-    weight: ['100', '200', '300', '400' , '500', '600']
-})
+    subsets: ["latin"],
+    weight: ["100", "200", "300", "400", "500", "600"],
+});
 
 interface ProgressBarProps {
     progressPercent: number; // e.g. 50
@@ -27,6 +25,8 @@ interface ProgressBarProps {
     wrong: number;
     onPrev: () => void; // function to go to previous question
     index: number; // current index
+    examEnabled: boolean; // whether the exam mode is enabled
+    quizAction?: string | null; // optional action for the quiz
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -37,6 +37,8 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     wrong,
     onPrev,
     index,
+    examEnabled,
+    quizAction,
 }) => {
     const router = useRouter();
     const handleQuitClick = () => {
@@ -77,33 +79,37 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                         style={{ left: `${progressPercent}%` }}
                     ></div>
                 </div>
-                <div className={`${albertSans.className} mt-1 text-sm text-gray-600 whitespace-nowrap`}>  
+                <div
+                    className={`${albertSans.className} mt-1 text-sm text-gray-600 whitespace-nowrap`}
+                >
                     {currentNumber}/{total}&#160;•&#160;
                     {total - currentNumber}&#160;left
                 </div>
             </div>
 
             {/* Correct/Wrong scoreboard */}
-            <div className="flex items-center gap-3 border py-1 px-2 rounded-full">
-                <div className="flex items-center gap-1">
-                    <Image
-                        src="/q-check.svg"
-                        alt="check"
-                        width={15}
-                        height={15}
-                    />
-                    {correct}
+            {!examEnabled || quizAction === "review" ? (
+                <div className="flex items-center gap-3 border py-1 px-2 rounded-full">
+                    <div className="flex items-center gap-1">
+                        <Image
+                            src="/q-check.svg"
+                            alt="check"
+                            width={15}
+                            height={15}
+                        />
+                        {correct}
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Image
+                            src="/q-wrong.svg"
+                            alt="wrong"
+                            width={15}
+                            height={15}
+                        />
+                        {wrong}
+                    </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <Image
-                        src="/q-wrong.svg"
-                        alt="wrong"
-                        width={15}
-                        height={15}
-                    />
-                    {wrong}
-                </div>
-            </div>
+            ) : null}
         </div>
     );
 };
