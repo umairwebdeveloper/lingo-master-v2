@@ -48,6 +48,7 @@ export default function QuizPage() {
                 showExistingAnswers={showExistingAnswers}
                 examEnabled={enabled}
                 examCompleted={examCompleted}
+                quizAction={action}
             />
         </div>
     );

@@ -33,6 +33,7 @@ interface QuestionContentProps {
     correct: number;
     wrong: number;
     examEnabled: boolean;
+    quizAction: string | null;
 }
 
 const QuestionContent: React.FC<QuestionContentProps> = ({
@@ -52,6 +53,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     correct,
     wrong,
     examEnabled,
+    quizAction,
 }) => {
     const router = useRouter();
     const { id }: any = useParams();
@@ -64,7 +66,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
 
     const handleNextQuestion = () => {
         handleSubmit();
-        if (examEnabled) {
+        if (examEnabled && quizAction !== "review") {
             nextQ();
         }
     };
@@ -240,7 +242,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             </div>
 
             {/* Feedback / Explanation (hidden during exam mode) */}
-            {!examEnabled && answer.feedback && (
+            {(quizAction === "review" || !examEnabled) && answer.feedback ? (
                 <div className="mt-4 p-3 bg-green-50 border rounded-2xl">
                     {question.type === "multiple" &&
                         answer.response !== null &&
@@ -291,7 +293,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                         ))}
                     <p className="text-gray-700 mt-2">{question.explanation}</p>
                 </div>
-            )}
+            ) : null}
         </>
     );
 };
