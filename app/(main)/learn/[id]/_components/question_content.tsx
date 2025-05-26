@@ -66,7 +66,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
 
     const handleNextQuestion = () => {
         handleSubmit();
-        if (examEnabled && quizAction !== "review") {
+        if (examEnabled) {
             nextQ();
         }
     };
