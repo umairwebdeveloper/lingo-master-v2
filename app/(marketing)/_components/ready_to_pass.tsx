@@ -4,7 +4,7 @@ import React from "react";
 
 export default function ReadyToPass() {
     return (
-        <section className="relative bg-blue-600 text-white overflow-hidden">
+        <section className="relative bg-blue-600 text-white overflow-hidden w-full">
             {/* Decorative road pattern */}
             <div className="absolute inset-0">
                 <Image

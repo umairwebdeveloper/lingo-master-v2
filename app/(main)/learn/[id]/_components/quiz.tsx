@@ -9,12 +9,19 @@ import QuestionContent from "./question_content";
 import ErrorComponent from "@/components/error-component";
 import Loader from "@/components/loader";
 
+interface ExamTimerProps {
+    examId: string;
+    enabled: boolean;
+    onComplete: (examId: string) => void;
+}
+
 interface QuizProps {
     topicId: number;
     showExistingAnswers?: boolean;
     examEnabled: boolean;
     examCompleted: any;
     quizAction: string | null;
+    examTimerProps: ExamTimerProps;
 }
 
 export default function Quiz({
@@ -23,6 +30,7 @@ export default function Quiz({
     examEnabled,
     examCompleted,
     quizAction,
+    examTimerProps,
 }: QuizProps) {
     const letters = ["A", "B", "C", "D"];
     const searchParams = useSearchParams();
@@ -348,6 +356,9 @@ export default function Quiz({
                         index={index}
                         examEnabled={examEnabled}
                         quizAction={quizAction}
+                        enabled={examTimerProps.enabled}
+                        examId={examTimerProps.examId}
+                        onComplete={examTimerProps.onComplete}
                     />
 
                     <QuestionContent

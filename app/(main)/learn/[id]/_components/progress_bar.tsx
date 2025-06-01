@@ -6,6 +6,11 @@ import Image from "next/image";
 
 import { Albert_Sans } from "@next/font/google";
 import { Inter } from "@next/font/google";
+import dynamic from "next/dynamic";
+
+const ExamTimer = dynamic(() => import("../../_components/exam_timer"), {
+    ssr: false,
+});
 
 const albertSans = Albert_Sans({
     subsets: ["latin"],
@@ -27,6 +32,9 @@ interface ProgressBarProps {
     index: number; // current index
     examEnabled: boolean; // whether the exam mode is enabled
     quizAction?: string | null; // optional action for the quiz
+    enabled: boolean;
+    examId: string;
+    onComplete: any;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -39,6 +47,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     index,
     examEnabled,
     quizAction,
+    enabled,
+    examId,
+    onComplete,
 }) => {
     const router = useRouter();
     const handleQuitClick = () => {
@@ -86,6 +97,15 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
                     {total - currentNumber}&#160;left
                 </div>
             </div>
+            {quizAction !== "review" && (
+                <div className="ml-1">
+                    <ExamTimer
+                        examId={examId}
+                        enabled={enabled}
+                        onComplete={onComplete}
+                    />
+                </div>
+            )}
 
             {/* Correct/Wrong scoreboard */}
             {!examEnabled || quizAction === "review" ? (

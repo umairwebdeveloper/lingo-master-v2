@@ -11,28 +11,28 @@ const features: PlatformFeature[] = [
     {
         title: "Quiz overzicht",
         subtitle: "Data-driven risk management & fraud detection.",
-        image: "/landing_page/unique_platform/image_1.png",
+        image: "/landing_page/unique_platform/image_1.svg",
     },
     {
         title: "Video overzicht",
         subtitle: "AI-powered diagnostics & predictive analytics.",
-        image: "/landing_page/unique_platform/image_2.png",
+        image: "/landing_page/unique_platform/image_2.svg",
         cols: 2,
     },
     {
         title: "Voortgangsoverzicht",
         subtitle: "Data-driven risk management & fraud detection.",
-        image: "/landing_page/unique_platform/image_3.png",
+        image: "/landing_page/unique_platform/image_3.svg",
     },
     {
         title: "Week streak",
         subtitle: "Data-driven risk management & fraud detection.",
-        image: "/landing_page/unique_platform/image_4.png",
+        image: "/landing_page/unique_platform/image_4.svg",
     },
     {
         title: "Productiviteitsgrafiek",
         subtitle: "Data-driven risk management & fraud detection.",
-        image: "/landing_page/unique_platform/image_5.png",
+        image: "/landing_page/unique_platform/image_5.svg",
     },
 ];
 

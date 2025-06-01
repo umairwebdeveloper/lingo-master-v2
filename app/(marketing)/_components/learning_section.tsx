@@ -17,7 +17,7 @@ export default function LearningSection() {
                     {/* Left: screenshots */}
                     <div className="relative w-full">
                         <Image
-                            src="/landing_page/learning_section.png"
+                            src="/landing_page/learning_section.svg"
                             alt="Video player interface op desktop"
                             width={800}
                             height={450}

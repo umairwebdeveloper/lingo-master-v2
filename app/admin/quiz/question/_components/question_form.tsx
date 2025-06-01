@@ -1,11 +1,12 @@
+// _components/question_form.tsx
 import React, { useState, useEffect } from "react";
 
 export interface QuestionFormData {
     selectedQuestionId: string;
     questionType: string;
     question: string;
+    numOptions: number; // new
     options: string[];
-    // New field for storing images for each option
     optionImages: (File | null)[];
     correctAnswer: string;
     explanation: string;
@@ -13,7 +14,7 @@ export interface QuestionFormData {
     category: string;
     description: string;
     image: File | null;
-    imageUrl?: string; // Optional URL for an existing image (edit mode)
+    imageUrl?: string;
 }
 
 interface QuestionFormProps {
@@ -46,16 +47,37 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         }));
     };
 
-    const handleOptionChange = (index: number, value: string) => {
-        const updatedOptions = [...formData.options];
-        updatedOptions[index] = value;
-        setFormData((prev) => ({
-            ...prev,
-            options: updatedOptions,
-        }));
+    const handleNumOptionsChange = (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ) => {
+        const count = Number(e.target.value);
+        // Truncate or pad the options array to length = count
+        setFormData((prev) => {
+            const newOptions = [...prev.options].slice(0, count);
+            while (newOptions.length < count) newOptions.push("");
+            const newOptionImages = [...prev.optionImages].slice(0, count);
+            while (newOptionImages.length < count) newOptionImages.push(null);
+            return {
+                ...prev,
+                numOptions: count,
+                options: newOptions,
+                optionImages: newOptionImages,
+                correctAnswer: "", // reset chosen answer
+            };
+        });
     };
 
-    // Special handler for the main image file input
+    const handleOptionChange = (index: number, value: string) => {
+        setFormData((prev) => {
+            const updated = [...prev.options];
+            updated[index] = value;
+            return {
+                ...prev,
+                options: updated,
+            };
+        });
+    };
+
     const handleFileChange = (e: any) => {
         if (e.target.files && e.target.files[0]) {
             setFormData((prev) => ({
@@ -65,7 +87,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         }
     };
 
-    // Handler for option image file input
     const handleOptionFileChange = (
         index: number,
         e: React.ChangeEvent<HTMLInputElement>
@@ -77,41 +98,35 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 newOptionImages[index] = file;
                 return { ...prev, optionImages: newOptionImages };
             });
-            // Generate a preview URL for the option image
             const objectUrl = URL.createObjectURL(file);
             setOptionPreviews((prev) => {
-                const newPreviews = [...prev];
-                newPreviews[index] = objectUrl;
-                return newPreviews;
+                const newPrevs = [...prev];
+                newPrevs[index] = objectUrl;
+                return newPrevs;
             });
         }
     };
 
-    // Local state to manage main image preview URL.
     const [preview, setPreview] = useState<string | null>(null);
-    // Local state for option image previews
-    const [optionPreviews, setOptionPreviews] = useState<(string | null)[]>([
-        null,
-        null,
-        null,
-        null,
+    const [optionPreviews, setOptionPreviews] = useState<string[]>([
+        "",
+        "",
+        "",
+        "",
     ]);
 
     useEffect(() => {
-        // If a new main file is selected, generate a preview URL.
         if (formData.image) {
             const objectUrl = URL.createObjectURL(formData.image);
             setPreview(objectUrl);
             return () => URL.revokeObjectURL(objectUrl);
         } else if (formData.imageUrl) {
-            // If editing and an existing image URL exists, use that.
             setPreview(formData.imageUrl);
         } else {
             setPreview(null);
         }
     }, [formData.image, formData.imageUrl]);
 
-    // Function to remove the current main image
     const handleRemoveImage = () => {
         setFormData((prev) => ({
             ...prev,
@@ -121,17 +136,16 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         setPreview(null);
     };
 
-    // Function to remove an option image at a given index
     const handleRemoveOptionImage = (index: number) => {
         setFormData((prev) => {
-            const newOptionImages = [...prev.optionImages];
-            newOptionImages[index] = null;
-            return { ...prev, optionImages: newOptionImages };
+            const arr = [...prev.optionImages];
+            arr[index] = null;
+            return { ...prev, optionImages: arr };
         });
         setOptionPreviews((prev) => {
-            const newPreviews = [...prev];
-            newPreviews[index] = null;
-            return newPreviews;
+            const arr = [...prev];
+            arr[index] = "";
+            return arr;
         });
     };
 
@@ -143,6 +157,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             }}
             className="space-y-4"
         >
+            {/* Topic selector */}
             <div>
                 <label
                     htmlFor="topicId"
@@ -167,6 +182,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     ))}
                 </select>
             </div>
+
+            {/* Question Type */}
             <div>
                 <label
                     htmlFor="questionType"
@@ -181,7 +198,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                         setFormData((prev) => ({
                             ...prev,
                             questionType: e.target.value,
-                            correctAnswer: "", // reset correctAnswer on type change
+                            correctAnswer: "",
                         }))
                     }
                     className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-2xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -193,6 +210,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     <option value="fill-in-the-blank">Fill in the Blank</option>
                 </select>
             </div>
+
+            {/* Category */}
             <div>
                 <label
                     htmlFor="category"
@@ -215,6 +234,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     <option value="Insight">Insight</option>
                 </select>
             </div>
+
+            {/* Question Text */}
             <div>
                 <label
                     htmlFor="question"
@@ -231,7 +252,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     required
                 />
             </div>
-            {/* New Description Field */}
+
+            {/* Description */}
             <div>
                 <label
                     htmlFor="description"
@@ -247,7 +269,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-2xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
             </div>
-            {/* Main Image Field */}
+
+            {/* Main Image */}
             <div>
                 <label
                     htmlFor="image"
@@ -264,7 +287,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     required
                 />
             </div>
-            {/* Main Image Preview and Remove Button */}
             {preview && (
                 <div className="relative">
                     <p className="text-sm text-gray-700">Image Preview:</p>
@@ -282,67 +304,95 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     </button>
                 </div>
             )}
+
+            {/* Number of Options */}
+            {(formData.questionType === "multiple-choice" ||
+                formData.questionType === "multiple-choice-with-image") && (
+                <div>
+                    <label
+                        htmlFor="numOptions"
+                        className="block text-sm font-medium text-gray-700"
+                    >
+                        Number of Options
+                    </label>
+                    <select
+                        id="numOptions"
+                        value={formData.numOptions}
+                        onChange={handleNumOptionsChange}
+                        className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-2xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value={2}>2</option>
+                        <option value={3}>3</option>
+                        <option value={4}>4</option>
+                    </select>
+                </div>
+            )}
+
+            {/* Options Inputs */}
             {(formData.questionType === "multiple-choice" ||
                 formData.questionType === "multiple-choice-with-image") && (
                 <div>
                     <label className="block text-sm font-medium text-gray-700">
                         Options
                     </label>
-                    {formData.options.map((option, index) => (
-                        <div key={index} className="mb-4">
-                            <input
-                                type="text"
-                                value={option}
-                                onChange={(e) =>
-                                    handleOptionChange(index, e.target.value)
-                                }
-                                placeholder={`Option ${index + 1}`}
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-2xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mb-2"
-                                required
-                            />
-                            {formData.questionType ===
-                                "multiple-choice-with-image" && (
-                                <div className="flex items-center space-x-2">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                            handleOptionFileChange(index, e)
-                                        }
-                                        required
-                                    />
-                                    {optionPreviews[index] && (
-                                        <div className="relative">
-                                            <img
-                                                src={
-                                                    optionPreviews[
-                                                        index
-                                                    ] as string
-                                                }
-                                                alt={`Option ${
-                                                    index + 1
-                                                } preview`}
-                                                className="mt-2 h-16"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleRemoveOptionImage(
-                                                        index
-                                                    )
-                                                }
-                                                className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 text-xs rounded-full"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                    {formData.options
+                        .slice(0, formData.numOptions)
+                        .map((option, index) => (
+                            <div key={index} className="mb-4">
+                                <input
+                                    type="text"
+                                    value={option}
+                                    onChange={(e) =>
+                                        handleOptionChange(
+                                            index,
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder={`Option ${index + 1}`}
+                                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-2xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mb-2"
+                                    required
+                                />
+                                {formData.questionType ===
+                                    "multiple-choice-with-image" && (
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) =>
+                                                handleOptionFileChange(index, e)
+                                            }
+                                            required
+                                        />
+                                        {optionPreviews[index] && (
+                                            <div className="relative">
+                                                <img
+                                                    src={optionPreviews[index]}
+                                                    alt={`Option ${
+                                                        index + 1
+                                                    } preview`}
+                                                    className="mt-2 h-16"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleRemoveOptionImage(
+                                                            index
+                                                        )
+                                                    }
+                                                    className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 text-xs rounded-full"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                 </div>
             )}
+
+            {/* Correct Answer */}
             <div>
                 <label
                     htmlFor="correctAnswer"
@@ -362,11 +412,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                         <option value="" disabled>
                             Select the correct option
                         </option>
-                        {formData.options.map((_, index) => (
-                            <option key={index} value={index + 1}>
-                                Option {index + 1}
-                            </option>
-                        ))}
+                        {Array.from({ length: formData.numOptions }).map(
+                            (_, idx) => (
+                                <option key={idx} value={idx + 1}>
+                                    Option {idx + 1}
+                                </option>
+                            )
+                        )}
                     </select>
                 ) : (
                     <input
@@ -380,6 +432,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     />
                 )}
             </div>
+
+            {/* Explanation */}
             <div>
                 <label
                     htmlFor="explanation"
@@ -396,6 +450,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                     required
                 />
             </div>
+
+            {/* Submit / Cancel */}
             <div className="flex space-x-2">
                 <button
                     type="submit"

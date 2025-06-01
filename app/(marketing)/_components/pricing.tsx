@@ -25,7 +25,7 @@ const packages: Package[] = [
         days: 14,
         modules: 4,
         price: "29,99",
-        image: "/landing_page/pricing/image_1.png",
+        image: "/landing_page/pricing/image_3.svg",
     },
     {
         id: "expert",
@@ -33,7 +33,7 @@ const packages: Package[] = [
         days: 31,
         modules: 10,
         price: "49,99",
-        image: "/landing_page/pricing/image_2.png",
+        image: "/landing_page/pricing/image_1.svg",
         recommended: true,
     },
     {
@@ -42,7 +42,7 @@ const packages: Package[] = [
         days: 21,
         modules: 7,
         price: "39,99",
-        image: "/landing_page/pricing/image_3.png",
+        image: "/landing_page/pricing/image_2.svg",
     },
 ];
 
