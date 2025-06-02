@@ -18,34 +18,28 @@ function transformQuestion(questionA: any) {
         id: questionA.id,
         type: newType,
         questionText: questionA.question,
-        questionDetail: questionA.description ? questionA.description : "",
-        imageUrl: questionA.image ? questionA.image : "",
+        questionDetail: questionA.description || "",
+        imageUrl: questionA.image || "",
         explanation: questionA.explanation,
         category: questionA.category,
     };
 
     if (newType === "multiple") {
-        // Convert correctAnswer from string to number
-        const correctIndex = parseInt(questionA.correctAnswer, 10);
-        transformed.choices = questionA.options.map(
-            (option: any, index: number) => ({
-                text: option,
-                isCorrect: index + 1 === correctIndex,
-            })
-        );
+        transformed.choices = questionA.options.map((option: string) => ({
+            text: option,
+            isCorrect: option === questionA.correctAnswer,
+        }));
     } else if (newType === "fill") {
         transformed.correctAnswer = questionA.correctAnswer;
     } else if (newType === "multiple-choice-with-image") {
-        // Convert correctAnswer from string to number
-        const correctIndex = parseInt(questionA.correctAnswer, 10);
         transformed.choices = questionA.options.map(
-            (option: any, index: number) => ({
+            (option: string, index: number) => ({
                 text: option,
                 image:
                     questionA.imageOptions && questionA.imageOptions[index]
                         ? questionA.imageOptions[index]
                         : "",
-                isCorrect: index + 1 === correctIndex,
+                isCorrect: option === questionA.correctAnswer,
             })
         );
     }
