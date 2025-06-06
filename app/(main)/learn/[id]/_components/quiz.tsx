@@ -292,7 +292,7 @@ export default function Quiz({
 
     // Choice styling helpers
     const getChoiceClasses = (choice: any, i: number) => {
-        if (!a.feedback || examEnabled) {
+        if (!a.feedback || (examEnabled && quizAction !== "review")) {
             return i === a.response
                 ? "border-blue-400 bg-blue-50"
                 : "border-gray-300 hover:bg-gray-100";
@@ -303,7 +303,7 @@ export default function Quiz({
     };
 
     const getLetterClasses = (choice: any, i: number) => {
-        if (!a.feedback || examEnabled) {
+        if (!a.feedback || (examEnabled && quizAction !== "review")) {
             return i === a.response
                 ? "bg-blue-700 text-white"
                 : "bg-gray-400 text-white";
@@ -316,7 +316,7 @@ export default function Quiz({
     };
 
     const getRadioColor = (choice: any, i: number) => {
-        if (!a.feedback || examEnabled) {
+        if (!a.feedback || (examEnabled && quizAction !== "review")) {
             return i === a.response ? "accent-blue-600" : "accent-gray-400";
         }
         if (choice.isCorrect) return "accent-green-600";
